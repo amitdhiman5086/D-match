@@ -67,6 +67,27 @@ app.patch("/user", async (req, res) => {
   }
 });
 
+//Update User By Email 
+app.patch("/userbymail", async (req, res) => {
+  // const userId = req.body.userId;
+  const data = req.body;
+  try {
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { email: req.body.email },
+      data,
+      {
+        returnDocument: "after",
+      }
+    );
+    if (updatedUser === null) {
+      res.status(404).send("User Not Exists");
+    }
+    res.send("User is Updated");
+  } catch (error) {
+    res.status(400).send("Something Went Wrong In Update Api");
+  }
+});
+
 app.post("/signUp", async (req, res) => {
   const userObject = req.body;
 
