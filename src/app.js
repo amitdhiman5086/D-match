@@ -35,6 +35,38 @@ app.get("/feed", async (req, res) => {
   }
 });
 
+//Delete Api
+app.delete("/user", async (req, res) => {
+  const userId = req.body.userId;
+  try {
+    const data = await UserModel.findByIdAndDelete(userId);
+    if (data === null) {
+      res.status(404).send("User Doesn't Exists in DB ");
+    } else {
+      res.send("User Deleted Successfully");
+    }
+  } catch (error) {
+    res.status(400).send("Something Went Wrong In Delete api");
+  }
+});
+
+//Update Api +> Diff. Between Patch and Put
+app.patch("/user", async (req, res) => {
+  const userId = req.body.userId;
+  const data = req.body;
+  try {
+    const updatedUser = await UserModel.findByIdAndUpdate(userId, data, {
+      returnDocument: "after",
+    });
+    if (updatedUser === null) {
+      res.status(404).send("User Not Exists");
+    }
+    res.send("User is Updated");
+  } catch (error) {
+    res.status(400).send("Something Went Wrong In Update Api");
+  }
+});
+
 app.post("/signUp", async (req, res) => {
   const userObject = req.body;
 
