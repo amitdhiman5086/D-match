@@ -51,23 +51,46 @@ app.delete("/user", async (req, res) => {
 });
 
 //Update Api +> Diff. Between Patch and Put
-app.patch("/user", async (req, res) => {
-  const userId = req.body.userId;
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId;
   const data = req.body;
   try {
+    const ALLOWED_UPDATE = ["photoURL", "about", "password", "skills"];
+    const isAllowed = Object.keys(data).every((key) =>
+      ALLOWED_UPDATE.includes(key)
+    );
+    if (!isAllowed) {
+      throw new Error("Invalid Updates");
+    }
+
+    if (data?.skills && (data?.skills.length > 10 || data?.skills.length < 0)) {
+      throw new Error("Skills Should be less than 10");
+    }
+
+    if (data?.password && data?.password.length < 8) {
+      throw new Error("Password Should be Greater than 8");
+    }
+
+    if (data?.about && data?.about.length > 100) {
+      throw new Error("About Should be Less than 100");
+    }
+
     const updatedUser = await UserModel.findByIdAndUpdate(userId, data, {
       returnDocument: "after",
+      runValidators: true,
     });
     if (updatedUser === null) {
       res.status(404).send("User Not Exists");
     }
     res.send("User is Updated");
   } catch (error) {
-    res.status(400).send("Something Went Wrong In Update Api");
+    res
+      .status(400)
+      .send("Something Went Wrong In Update Api by ID   :-" + error.message);
   }
 });
 
-//Update User By Email 
+//Update User By Email
 app.patch("/userbymail", async (req, res) => {
   // const userId = req.body.userId;
   const data = req.body;
@@ -77,6 +100,7 @@ app.patch("/userbymail", async (req, res) => {
       data,
       {
         returnDocument: "after",
+        runValidators: true,
       }
     );
     if (updatedUser === null) {
