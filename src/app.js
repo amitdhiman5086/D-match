@@ -5,7 +5,13 @@ const { validateSignUpData } = require("./utils/validation.js");
 const app = express();
 const bcrypt = require("bcrypt");
 const validator = require("validator");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
+const { userAuth } = require("./middleware/auth.js");
 app.use(express.json());
+app.use(cookieParser());
+dotenv.config();
 
 app.get("/user", async (req, res) => {
   const emailId = req.body.email;
@@ -122,7 +128,7 @@ app.post("/signUp", async (req, res) => {
     const { firstName, lastName, email, password } = req.body;
 
     const passwordHash = bcrypt.hashSync(password, 8, () => {
-      console.log("Password Hashed");
+      // console.log("Password Hashed");
     });
 
     // console.log(passwordHash);
@@ -152,11 +158,32 @@ app.post("/login", async (req, res) => {
   if (!user) {
     return res.status(404).send("Invalid Credential");
   }
-  const isPasswordValid = await bcrypt.compare(password, user.password);
+  const isPasswordValid = await user.validatePassword(password);
   if (!isPasswordValid) {
     return res.status(400).send("Invalid Credential");
   }
+
+  const token = await user.getJWT();
+
+  res.cookie("token", token, { expires: new Date(Date.now() + 720 * 3600000) });
   res.send("User is Authenticated");
+});
+
+app.get("/profile", userAuth, async (req, res) => {
+  try {
+    const user = req.user;
+    res.send(user);
+  } catch (error) {
+    res.status(400).send("Something Went Wrong in Profile Api");
+  }
+});
+
+app.post("/sendConnectionRequest", userAuth, async (req, res, next) => {
+  const user = req.user;
+  const name = user?.firstName;
+  console.log("Sending  Request");
+
+  res.send("Request Send " + name);
 });
 
 connectDb()
