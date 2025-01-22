@@ -1,8 +1,10 @@
 const express = require("express");
 const connectDb = require("./config/dataBase.js");
 const UserModel = require("./models/userSchema.js");
+const { validateSignUpData } = require("./utils/validation.js");
 const app = express();
-
+const bcrypt = require("bcrypt");
+const validator = require("validator");
 app.use(express.json());
 
 app.get("/user", async (req, res) => {
@@ -113,10 +115,24 @@ app.patch("/userbymail", async (req, res) => {
 });
 
 app.post("/signUp", async (req, res) => {
-  const userObject = req.body;
-
   try {
-    const user = new UserModel(userObject);
+    //Validating the req.body
+    validateSignUpData(req);
+
+    const { firstName, lastName, email, password } = req.body;
+
+    const passwordHash = bcrypt.hashSync(password, 8, () => {
+      console.log("Password Hashed");
+    });
+
+    // console.log(passwordHash);
+
+    const user = new UserModel({
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      password: passwordHash,
+    });
     const data = await user.save();
     res.send(data);
   } catch (error) {
@@ -124,6 +140,23 @@ app.post("/signUp", async (req, res) => {
       .status(400)
       .send("Error message while Saving The User :" + error.message);
   }
+});
+
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  if (!(email && validator.isEmail(email))) {
+    return res.status(400).send("Email is Not Valid");
+  }
+
+  const user = await UserModel.findOne({ email: email });
+  if (!user) {
+    return res.status(404).send("Invalid Credential");
+  }
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    return res.status(400).send("Invalid Credential");
+  }
+  res.send("User is Authenticated");
 });
 
 connectDb()
@@ -135,5 +168,5 @@ connectDb()
     });
   })
   .catch((err) => {
-    console.log("Error While Connecting to the Database" + err);
+    console.log("Error While Connecting to " + err);
   });

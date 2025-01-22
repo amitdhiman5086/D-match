@@ -1,4 +1,4 @@
-# My Notes on Versioning in package.json
+w# My Notes on Versioning in package.json
 
 This document explains the difference between `~` and `^` in package.json version numbers in simple terms.
 
