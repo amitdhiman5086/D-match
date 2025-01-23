@@ -11,6 +11,29 @@ const validateSignUpData = (req) => {
   }
 };
 
+const validateEditProfileData = (req) => {
+  const allowedEditFields = [
+    "firstName",
+    "lastName",
+    "age",
+    "skills",
+    "gender",
+    "photoURL",
+    "about",
+  ];
+
+  const isAllowed = Object.keys(req.body).every((key) =>
+    allowedEditFields.includes(key)
+  );
+
+  if (req.body.photoURL && !validator.isURL(req.body?.photoURL)) {
+    throw new Error("Photo URL is Not Valid");
+  }
+
+  return isAllowed;
+};
+
 module.exports = {
   validateSignUpData,
+  validateEditProfileData,
 };
