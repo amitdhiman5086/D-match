@@ -12,3 +12,7 @@ This document explains the difference between `~` and `^` in package.json versio
 **Q: How can I play with routes and route extensions?**
 
 **A:** You can experiment with different routes and route extensions, for example, `/hello`, `/`, `hello/2`, `/xyz`. Remember, the order of the routes matters a lot.
+
+Read more about indexes in MongoDB
+Why do we need index in DB?
+What is the advantages and disadvantage of creating?
