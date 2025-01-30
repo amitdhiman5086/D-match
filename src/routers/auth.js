@@ -11,7 +11,17 @@ authRouter.post("/signUp", async (req, res) => {
     //Validating the req.body
     validateSignUpData(req);
 
-    const { firstName, lastName, email, password } = req.body;
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      age,
+      skills,
+      gender,
+      photoURL,
+      about,
+    } = req.body;
 
     const passwordHash = bcrypt.hashSync(password, 8);
 
@@ -22,13 +32,22 @@ authRouter.post("/signUp", async (req, res) => {
       lastName: lastName,
       email: email,
       password: passwordHash,
+      age,
+      photoURL,
+      gender,
+      about,
+      skills,
     });
     const data = await user.save();
-    res.send(data);
+    const userData = data.toObject();
+    delete userData.password;
+
+    res.json({
+      message: userData.firstName + " is Registered Successfully ",
+      data: userData,
+    });
   } catch (error) {
-    res
-      .status(400)
-      .send("Error message while Saving The User :" + error.message);
+    res.status(400).json({ message: error.message });
   }
 });
 
@@ -48,16 +67,22 @@ authRouter.post("/login", async (req, res) => {
   }
 
   const token = await user.getJWT();
+  //Deleteing the sensitive Information
+  const userData = user.toObject();
+  delete userData.password;
 
   res.cookie("token", token, { expires: new Date(Date.now() + 720 * 3600000) });
-  res.send("User is Authenticated");
+  res.json({
+    message: "Authenticated ..",
+    data: userData,
+  });
 });
 
 authRouter.post("/logout", async (req, res) => {
   res.cookie("token", null, {
     expires: new Date(Date.now()),
   });
-  res.send("LogOut Success ")
+  res.send("LogOut Success ");
 });
 
 module.exports = authRouter;

@@ -10,7 +10,11 @@ const profileRouter = express.Router();
 profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
     const user = req.user;
-    res.send(user);
+    const userData = user.toObject();
+    delete userData.password;
+    res.json({
+      data: userData,
+    });
   } catch (error) {
     res.status(400).send("Something Went Wrong in Profile Api");
   }
