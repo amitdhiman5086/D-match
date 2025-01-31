@@ -39,9 +39,15 @@ authRouter.post("/signUp", async (req, res) => {
       skills,
     });
     const data = await user.save();
+
+    const token = await user.getJWT();
     const userData = data.toObject();
     delete userData.password;
 
+
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 720 * 3600000),
+    });
     res.json({
       message: userData.firstName + " is Registered Successfully ",
       data: userData,
@@ -83,7 +89,7 @@ authRouter.post("/logout", async (req, res) => {
     expires: new Date(Date.now()),
   });
   res.json({
-    message : "Logout successfully."
+    message: "Logout successfully.",
   });
 });
 

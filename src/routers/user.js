@@ -14,20 +14,26 @@ const USER_SAFE_DATA = [
 ];
 
 userRouter.get("/user/request/received", userAuth, async (req, res) => {
-  const loginUser = req.user;
+  try {
+    const loginUser = req.user;
 
-  const connectionRequest = await ConnectionRequestModel.find({
-    toUserId: loginUser._id,
-    requestStatus: "interested",
-  }).populate("fromUserId", USER_SAFE_DATA);
+    const connectionRequest = await ConnectionRequestModel.find({
+      toUserId: loginUser._id,
+      requestStatus: "interested",
+    }).populate("fromUserId", USER_SAFE_DATA);
 
-  const countRequest =
-    connectionRequest.length == undefined ? 0 : connectionRequest.length;
+    const countRequest =
+      connectionRequest.length == undefined ? 0 : connectionRequest.length;
 
-  res.json({
-    message: "Your Requests are :" + countRequest,
-    connectionRequest,
-  });
+    res.json({
+      message: "Your Requests are :" + countRequest,
+      connectionRequest,
+    });
+  } catch (error) {
+    res.status(404).json({
+      message: "Error : " + error,
+    });
+  }
 });
 
 userRouter.get("/user/connections", userAuth, async (req, res) => {

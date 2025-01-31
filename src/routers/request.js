@@ -90,7 +90,7 @@ requestRouter.patch(
       }
 
       connectionRequest.requestStatus = requestStatus;
-      console.log(connectionRequest);
+      // console.log(connectionRequest);
 
       const data = await connectionRequest.save();
 
