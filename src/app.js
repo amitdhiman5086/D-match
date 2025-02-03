@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://13.60.18.36:5173", // Allow requests from React app
+    origin: "http://13.60.18.36:80", // Allow requests from React app
     credentials: true, // Allow cookies/auth
   })
 );
